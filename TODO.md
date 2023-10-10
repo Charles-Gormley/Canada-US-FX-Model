@@ -11,6 +11,11 @@
 [ ] K means to remove Null Values
 [ ] Mean Squared Error 
 
+## Feature Sets
+* I want to use 1 with everything
+* Another where I eye-ball multi-collinearity avoidance and high regression coefficients with dependent variable.
+* [Advanced] Calculate Multi-collinearity of each variable with other prediction variables. Remove multi-collinear variable (except for one of course)
+* [Advanced] Calculate correllations with the dependent variable (Next hour of trading). Keep good predictor variables while avoiding multi-collinearity.
 
 ## Feature Engineering
 [ ] Normalize/Scale Features
