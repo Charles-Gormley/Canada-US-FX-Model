@@ -44,6 +44,7 @@
 - **SPY**: SPDR S&P 500 ETF Trust [US]
 - **RVX**: Russell 2000 Volatility Index [US]'
 - **SPX**: S&P 500 stock index
+- **ZCN**: BMO S&P/TSX Capped Composite Index ETF [Canadian Equities]
 
 ## Industry Index Funds:
 - **USO**: United States Oil Fund ETF
@@ -55,7 +56,6 @@
 
 ## Other:
 - **DVS**: Not widely recognized; verify context
-- **ZCN**: Not widely recognized; verify context
 - **VIX**: CBOE Volatility Index
 
 

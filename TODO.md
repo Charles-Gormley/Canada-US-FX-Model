@@ -32,6 +32,8 @@
 [ ] Early Stopping
 [ ] Hyperparameter Tuning
 
+## Models
+[ ] Pick 2 Models which will be really good with sklearn
 
 ## Feature Tuning
 [ ] Feature Importance
