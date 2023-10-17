@@ -51,7 +51,6 @@
 - **OVX**: Crude Oil Volatility Index
 
 ## Treasuries:
-
 - **TYVIX**: 10-year Treasury Note Volatility Index
 
 ## Other:

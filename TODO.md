@@ -8,8 +8,8 @@
 [ ] Multi-Collinearity
 
 ## Data Cleaning
-[ ] K means to remove Null Values
-[ ] Mean Squared Error 
+[x] K means to remove Null Values
+[x] Mean Squared Error 
 
 ## Feature Sets
 * I want to use 1 with everything
@@ -18,11 +18,12 @@
 * [Advanced] Calculate correllations with the dependent variable (Next hour of trading). Keep good predictor variables while avoiding multi-collinearity.
 
 ## Feature Engineering
-[ ] Normalize/Scale Features
+[x] Normalize/Scale Features
 [ ] Pick the most relevant currencies to the Canadian rate [Basically countries which interact with Canada]
 [ ] Seasonality Variables [Quarter, January Effect, Monday Effect]
-[ ] Trend Variables [Year itself]
-[ ] K-means for null values
+
+[x] Trend Variables [Year itself]
+[x] K-means for null values
 [ ] Non Linear Functions
 [ ] Volatility Feature High and Low Difference
 
@@ -33,8 +34,24 @@
 [ ] Hyperparameter Tuning
 
 ## Models
-[ ] Pick 2 Models which will be really good with sklearn
+[ ] Pick a couple linear models Models which will be really good with sklearn
 
 ## Feature Tuning
 [ ] Feature Importance
 [ ] Playing around with different currency combinations.
+
+## Questions
+* What is DVS
+* Will there ever be a case where the data will be a missing value? 
+
+# Parameters & Hyperparameters
+* Feature Sets
+** Features (Themselves in each set)
+* Missing Value Technique
+* Normalization Technique
+* Categorical Encoding (Ordinal v. One Hot Encoding)
+** Ordinal will be useful for year data.
+** Ordinal could also be used to calculate the ordinal month January 2010 --> January 2022. like that.
+* Quarterly Data
+* Seasonality Attribute for January 
+
