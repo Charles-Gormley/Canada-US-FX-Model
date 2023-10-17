@@ -1,5 +1,7 @@
 # Python Modules
 import logging
+log_format = '%(asctime)s - %(levelname)s - %(message)s'
+logging.basicConfig(format=log_format, level=logging.INFO)
 
 # Standard Data Science Libraries
 import pandas as pd
@@ -33,30 +35,58 @@ numerical_transformer = Pipeline(steps=[
 # b) Process date feature - this will require custom transformers
 from sklearn.base import BaseEstimator, TransformerMixin
 
-class DateTransformer(BaseEstimator, TransformerMixin):
+class CustomDateTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, date_col_name='date'):
+        logging.info("Function Custom Date Generator init() has been called")
+        self.date_col_name = date_col_name
+
     def fit(self, X, y=None):
-        
+        logging.info("Function Custom Date Generator fit() has been called")
         return self
+
+    def transform(self, X):
+        X_ = X.copy()
+        logging.info("Function Custom Date Generator transform() has been called")
+        X_[self.date_col_name] = pd.to_datetime(X_[self.date_col_name])
+        X_['day'] = X_[self.date_col_name].dt.day
+        X_['hour'] = X_[self.date_col_name].dt.hour
+        X_['quarter'] = X_[self.date_col_name].dt.quarter
+        X_['m'] = X_[self.date_col_name].dt.month
+        X_['minute'] = X_[self.date_col_name].dt.minute
+        X_['y'] = X_[self.date_col_name].dt.year
+        return X_.drop(columns=[self.date_col_name])
     
-    def transform(self, X, y=None):
-        df_x = X.copy()
+class CustomeNumericTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, imputer):
+        logging.info("Function Custom Numeric Generator init() has been called")
+        self.imputer = imputer
+        self.scaler = StandardScaler()
 
-        df_x['day'] = df_x['date'].dt.dayofweek
-        df_x['m'] = df_x['date'].dt.month
-        df_x['y'] = df_x['date'].dt.year
-        df_x['quarter'] = df_x['date'].dt.quarter
-        df_x['hour'] = df_x['date'].dt.hour
-        df_x['minute'] = df_x['date'].dt.minute
+    def fit(self, X, y=None):
+        logging.info("Function Custom Numeric Generator fit() has been called")
+        self.imputer.fit(X)
+        self.scaler.fit(X)
+        return self
 
-        df_x = df_x.drop(columns=['date'])
-        return df_x
+    def transform(self, X):
+        X_ = X.copy()
+        logging.info("Function Custom Numeric Generator transform() has been called")
+
+        X = self.imputer.transform(X)
+        X = self.scaler.transform(X)
+
+        X_df = pd.DataFrame(X, columns=X_.columns)
+
+        return X_df
+        
+
+        
 
 # c) One-hot encoding
 categorical_transformer = OneHotEncoder()
 ordinal_transformer = OrdinalEncoder()
 
 independent_vars = df_x.columns.to_list()
-print(independent_vars)
 raw_date_column = ['date']
 independent_vars.remove('date')
 onehot_categorical_features = ['day', 'hour', 'quarter', 'm']
@@ -97,44 +127,63 @@ scoring = {
 for model in models:
     for ind_vars in feature_sets:
         for null_strategy in null_strategies:
+            logging.info(f"Starting the model training of {ind_vars[1]}")
             model_results = dict()
             model_results['model'] = model[1]
             model_results['ind_vars'] = ind_vars[1]
-            model_results[''] = null_strategy[1]            
-            # model_results[''] = [1]
-            # model_results[''] = [1]
+            model_results['imputer'] = null_strategy[1]            
             # Train-Test Split
+
+            numerical_features = ind_vars[0]
+
+            categorical_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='most_frequent')),
+                ('onehot', OneHotEncoder(handle_unknown='ignore'))
+            ])
+
+            # preprocessor = ColumnTransformer(
+            #     transformers=[
+            #         ('num', numerical_transformer, numerical_features),
+            #         ('cat', categorical_transformer, categorical_cols)
+            #     ])
 
 
             numerical_transformer = Pipeline(steps=[
-                ('imputer', null_strategy),
-                ('scaler', StandardScaler())
-            ])
-        
-            
-            numerical_features = ind_vars[0]
-            
-            preprocessor = ColumnTransformer(
-                transformers=[
-                    ('num', numerical_transformer, numerical_features),
-                    ('date', DateTransformer(), ['date']),
+                                                ('imputer', SimpleImputer(strategy='mean')),
+                                                ('scaler', StandardScaler())
+                                            ],
+                                            verbose=True
+            )    
+
+            cat_processor = ColumnTransformer(transformers=[('date', CustomDateTransformer(), ['date'])])
+
+            preprocessor = ColumnTransformer(transformers=[
                     ('one_cat', categorical_transformer, onehot_categorical_features),
                     ('ordcat', ordinal_transformer, ordinal_categorical_features)
                 ]
             )
+            num_preprocessor = ColumnTransformer(transformers=[('num', numerical_transformer, numerical_features)])
 
             # Model Parameters
-            cur_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
-                                            ('regressor', model[0])])
+            cur_pipeline = Pipeline(steps=[
+                                           ('cat_processor', cat_processor),
+                                           ('preprocessor', preprocessor),
+                                           ('num_preprocessor', num_preprocessor),
+                                           ('regressor', model[0])],
+                                    verbose=True
+                                    )
             
-            cv_results = cross_validate(cur_pipeline, df_x, df_y, cv=10, scoring=scoring)
-            mse_scores = cv_results['test_mse']
-            avg_mse = mse_scores.mean()
+            cur_pipeline.fit(df_x, df_y)
+            
+            # # TODO: Process the entire pipeline as a numpy array? 
+            # cv_results = cross_validate(cur_pipeline, df_x, df_y, cv=10, scoring=scoring)
+            # mse_scores = cv_results['test_mse']
+            # avg_mse = mse_scores.mean()
 
-            r2_scores = cv_results['test_r2']  # Get the R^2 scores
-            avg_r2 = r2_scores.mean()  # Calculate the average R^2
+            # r2_scores = cv_results['test_r2']  # Get the R^2 scores
+            # avg_r2 = r2_scores.mean()  # Calculate the average R^2
 
-            print(f"Model: {model[1]}, Imputation: {null_strategy[1]}, Avg CV Score: {avg_mse}")
+            # print(f"Model: {model[1]}, Imputation: {null_strategy[1]}, Avg CV Score: {avg_mse}")
 
-            model_results = avg_mse
-            model_results = avg_r2
+            # model_results = avg_mse
+            # model_results = avg_r2
